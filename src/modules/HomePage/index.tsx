@@ -200,7 +200,6 @@ const HomePage: FC = () => {
                 <h4>
                   Are you mission ready? <a href="#">Join now!</a>
                 </h4>
-<<<<<<< HEAD
                 <div className={s.button}>
                   <Button
                     size="large"
@@ -210,8 +209,6 @@ const HomePage: FC = () => {
                     disabled
                   />
                 </div>
-=======
->>>>>>> 75393fb32a5d837e76847d0047df6959d3487baf
               </div>
               {/* </Slide> */}
             </div>
