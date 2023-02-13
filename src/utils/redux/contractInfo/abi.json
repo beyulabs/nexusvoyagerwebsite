@@ -107,8 +107,6 @@
 		"type": "error"
 	},
 	{
-<<<<<<< HEAD
-=======
 		"inputs": [
 			{
 				"internalType": "address",
@@ -120,7 +118,6 @@
 		"type": "error"
 	},
 	{
->>>>>>> 75393fb32a5d837e76847d0047df6959d3487baf
 		"inputs": [],
 		"name": "OwnerQueryForNonexistentToken",
 		"type": "error"
@@ -335,11 +332,7 @@
 			},
 			{
 				"internalType": "bytes",
-<<<<<<< HEAD
-				"name": "_data",
-=======
 				"name": "data",
->>>>>>> 75393fb32a5d837e76847d0047df6959d3487baf
 				"type": "bytes"
 			}
 		],
@@ -382,8 +375,6 @@
 	{
 		"inputs": [
 			{
-<<<<<<< HEAD
-=======
 				"internalType": "uint256",
 				"name": "_newSupply",
 				"type": "uint256"
@@ -397,7 +388,6 @@
 	{
 		"inputs": [
 			{
->>>>>>> 75393fb32a5d837e76847d0047df6959d3487baf
 				"internalType": "bool",
 				"name": "_state",
 				"type": "bool"
