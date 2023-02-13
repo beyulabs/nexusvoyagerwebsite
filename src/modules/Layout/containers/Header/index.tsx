@@ -91,6 +91,7 @@ const Header = () => {
 
   const fetchInfo = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(CONTRACT.address, abi, signer);
 
@@ -133,6 +134,7 @@ const Header = () => {
 
   const mint = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(CONTRACT.address, abi, signer);
     const user = keccak256(account);
