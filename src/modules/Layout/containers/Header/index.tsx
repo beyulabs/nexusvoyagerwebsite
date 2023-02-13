@@ -314,6 +314,7 @@ const Header = () => {
               disabled={balance >= 0.08 ? false : true}
               className={cn(s.mintButton)}
               onClick={mint}
+              style={balance <= 0.08 ? { cursor: "not-allowed" } : {}}
             >
               Mint
             </button>
