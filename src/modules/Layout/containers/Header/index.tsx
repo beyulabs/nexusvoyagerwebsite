@@ -1,71 +1,91 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Link from 'next/link';
-import SocialIcons from '@components/SocalIcons/SocialIcons';
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import Link from "next/link";
+import SocialIcons from "@components/SocalIcons/SocialIcons";
 
-import { Button } from '@components/Button/button';
-import { Coins, Wallet } from '@components/Icons/Icons';
-import cn from 'classnames';
-import useMediaQuery from '@modules/Layout/hooks/useMediaQuery';
-import { ethers } from 'ethers';
+import { Button } from "@components/Button/button";
+import { Coins, Wallet } from "@components/Icons/Icons";
+import cn from "classnames";
+import useMediaQuery from "@modules/Layout/hooks/useMediaQuery";
+import { ethers } from "ethers";
 
-import { routes } from '@utils/constants';
-import { useRouter } from 'next/router';
-import { useTheme } from 'next-themes';
-import { getContract, connect, updateAccount } from '../../../../utils/redux/blockchain/blockchainActions';
-import { NavRoute } from '../../../../types/common';
-import { Buffer } from 'buffer';
-import { selectAccountState, setConnectedAccount, setLoading, failedConnection } from '../../../../utils/redux/blockchain/blockchainReducer';
-import CONTRACT from '../../../../utils/redux/contractInfo/contractInfo.json';
-import abi from '../../../../utils/redux/contractInfo/abi.json';
-import whitelist from '../../../../utils/redux/contractInfo/whitelist.json';
-import keccak256 from 'keccak256';
-import { MerkleTree } from 'merkletreejs'
+import { routes } from "@utils/constants";
+import { useRouter } from "next/router";
+import { useTheme } from "next-themes";
+import {
+  getContract,
+  connect,
+  updateAccount,
+} from "../../../../utils/redux/blockchain/blockchainActions";
+import { NavRoute } from "../../../../types/common";
+import { Buffer } from "buffer";
+import {
+  selectAccountState,
+  setConnectedAccount,
+  setLoading,
+  failedConnection,
+} from "../../../../utils/redux/blockchain/blockchainReducer";
+import CONTRACT from "../../../../utils/redux/contractInfo/contractInfo.json";
+import abi from "../../../../utils/redux/contractInfo/abi.json";
+import whitelist from "../../../../utils/redux/contractInfo/whitelist.json";
+import keccak256 from "keccak256";
+import { MerkleTree } from "merkletreejs";
 
-import s from './Header.module.scss';
-import logo from "../../../../../public/nexus-voyagers-logotype.png"
-
+import s from "./Header.module.scss";
+import logo from "../../../../../public/nexus-voyagers-logotype.png";
+import Web3 from "web3";
 declare let window: any;
 
 const Header = () => {
   // @ts-ignore
-  window.Buffer = Buffer;
+  // Window.Buffer = Buffer;
 
   const { theme, setTheme } = useTheme();
   const isTablet = useMediaQuery(1200);
   const nextRouter = useRouter();
   const [activeNav, setActiveNav] = useState<boolean>(false);
 
-  const dispatch = useDispatch()
-  const account = useSelector(selectAccountState)
+  const dispatch = useDispatch();
+  const account = useSelector(selectAccountState);
 
-  const[pubCost, setPubCost] = useState(0);
-  const[preCost, setPreCost] = useState(0);
-  const[amount, setAmount] = useState(1)
-  const[pubsale, setPubSale] = useState();
-  const[presale, setPreSale] = useState();
-  const[modal, openModal] = useState(false);
-  const [tree, createTree] = useState(new MerkleTree([],null));
+  const [pubCost, setPubCost] = useState(0);
+  const [preCost, setPreCost] = useState(0);
+  const [amount, setAmount] = useState(1);
+  const [pubsale, setPubSale] = useState();
+
+  const [presale, setPreSale] = useState();
+  const [modal, openModal] = useState(false);
+  const [tree, createTree] = useState(new MerkleTree([], null));
+
+  const [balance, setBalance] = useState(100);
 
   const getWhitelistedAddresses = () => {
-    const leafNodes = whitelist.map(addr => keccak256(addr));
-    const tree = new MerkleTree(leafNodes, keccak256, { sortPairs: true })
-    createTree(tree)
-  }
+    const leafNodes = whitelist.map((addr) => keccak256(addr));
+    const tree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
+    createTree(tree);
+  };
   //0xb1d03b3d15c05f7c4b52f9394ad57a6afeb414cac472e1004abc06fc52383377
 
   const getAccounts = async () => {
     const { ethereum } = window;
 
-    const accountsConnected = await ethereum.request({ method: 'eth_accounts' });
+    const accountsConnected = await ethereum.request({
+      method: "eth_accounts",
+    });
     return accountsConnected;
   };
 
   const setConnectedAccountMeth = async () => {
-    const accounts = await getAccounts()
+    const accounts = await getAccounts();
+    let web3: Web3 = new Web3(window.ethereum);
     if (accounts.length > 0) {
+      const balance = await web3.eth.getBalance(accounts[0]);
+      setBalance(+balance);
+
       const contr = getContract();
-      dispatch(setConnectedAccount({account: accounts[0], smartContract: contr}));
+      dispatch(
+        setConnectedAccount({ account: accounts[0], smartContract: contr })
+      );
     }
   };
 
@@ -85,53 +105,46 @@ const Header = () => {
     setPreSale(preboarding);
   };
 
-  const handleConnection = async() =>{
+  const handleConnection = async () => {
     const { ethereum } = window;
     dispatch(setLoading());
-    let result = await connect()
-    if(result.error == ""){
+    let result = await connect();
+
+    if (result.error == "") {
       dispatch(
         setConnectedAccount({
-            account: result.account,
-            smartContract: result.contract
+          account: result.account,
+          smartContract: result.contract,
         })
       );
-      ethereum.on('accountsChanged', (accounts: any) => {
+      ethereum.on("accountsChanged", (accounts: any) => {
         updateAccount(accounts[0], getContract());
       });
-    }
-    else dispatch(failedConnection(result?.error));
-  }
+    } else dispatch(failedConnection(result?.error));
+  };
 
-  const increment = () =>{
-    setAmount(amount + 1)
-  }
+  const increment = () => {
+    setAmount(amount + 1);
+  };
 
-  const decrement = () =>{
-    if(amount > 1) setAmount(amount - 1)
-  }
+  const decrement = () => {
+    if (amount > 1) setAmount(amount - 1);
+  };
 
-  const mint = async() =>{
+  const mint = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(CONTRACT.address, abi, signer);
-    const user = keccak256(account)
-    const proof = tree.getHexProof(user)
-    let proofCheck = tree.verify(proof, user, tree.getHexRoot())
+    const user = keccak256(account);
+    const proof = tree.getHexProof(user);
+    let proofCheck = tree.verify(proof, user, tree.getHexRoot());
 
-    if(presale && proofCheck){
-      contract.preMint(
-        amount,
-        { value: String(amount * preCost) }
-      )
+    if (presale && proofCheck) {
+      contract.preMint(amount, { value: String(amount * preCost) });
+    } else if (pubsale) {
+      contract.mint(amount, { value: String(amount * pubCost) });
     }
-    else if(pubsale){
-      contract.mint(
-        amount,
-        { value: String(amount * pubCost) }
-      )
-    }
-  }
+  };
 
   useEffect(() => {
     setConnectedAccountMeth();
@@ -140,7 +153,7 @@ const Header = () => {
   }, [account]);
 
   const SwitchLightMode = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   const ToggleThemeMode = () => (
@@ -148,13 +161,13 @@ const Header = () => {
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <a onClick={SwitchLightMode} className={s.ToggleTheme}>
         {theme === "light" ? (
-          <img src={"/dark-mode-page.svg"} alt="Theme" width="26" height="26" />
+          <img src={"/dark-mode-page.svg"} alt='Theme' width='26' height='26' />
         ) : (
           <img
             src={"/light-mode-page.svg"}
-            alt="Theme"
-            width="26"
-            height="26"
+            alt='Theme'
+            width='26'
+            height='26'
           />
         )}
         <span>
@@ -197,21 +210,21 @@ const Header = () => {
         <ToggleThemeMode />
         <hr />
         <div className={s.buttons}>
-          <Button 
-            text="Mint" 
-            color="green" 
-            icon={<Coins />} 
-            disabled = { !account }
-            onClick = {
-              () => openModal(true)
-            }
+          <Button
+            text={`Mint `}
+            color='green'
+            icon={<Coins />}
+            disabled={!account}
+            onClick={() => openModal(true)}
           />
           <Button
             text={!account ? "Connect wallet" : "Connected"}
-            color="transparent"
+            color='transparent'
             icon={<Wallet />}
-            disabled = { account }
-            onClick={handleConnection}
+            disabled={account}
+            onClick={() => {
+              handleConnection;
+            }}
           />
         </div>
       </div>
@@ -224,31 +237,31 @@ const Header = () => {
 
   return (
     <header className={cn(s.header, activeNav && s.openNav)}>
-      <div className="container">
+      <div className='container'>
         <div className={s.header__row}>
-          <div className="logo">
+          <div className='logo'>
             {theme === "light" && (
-              <Link href="/">
+              <Link href='/'>
                 {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                 <a onClick={() => setActiveNav(false)}>
                   <img
                     src={"/nexus-voyagers-logotype-green-dark.svg"}
-                    alt="BeYu Labs logo"
-                    width="160"
-                    height="47"
+                    alt='BeYu Labs logo'
+                    width='160'
+                    height='47'
                   />
                 </a>
               </Link>
             )}
             {theme === "dark" && (
-              <Link href="/">
+              <Link href='/'>
                 {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
                 <a onClick={() => setActiveNav(false)}>
                   <img
                     src={"/nexus-voyagers-logotype-green-white.svg"}
-                    alt="BeYu Labs logo"
-                    width="160"
-                    height="47"
+                    alt='BeYu Labs logo'
+                    width='160'
+                    height='47'
                   />
                 </a>
               </Link>
@@ -259,7 +272,7 @@ const Header = () => {
             <button
               className={cn(s.nav_icon, activeNav && s.nav_icon_active)}
               onClick={navIconToggle}
-              role="button"
+              role='button'
               tabIndex={0}
             >
               <span />
@@ -273,29 +286,41 @@ const Header = () => {
         </div>
       </div>
       <div className={cn(s.mobileNav, activeNav && s.active)}>{menu}</div>
-      {
-        modal &&
+      {modal && (
         <div className={cn(s.modal)}>
           <div className={cn(s.modalComponent)}>
-            <img src={logo.src} className={cn(s.modalLogo)}/>
-            <p className={cn(s.modalText)}>PUBLIC SALE: {ethers.utils.formatEther(String(pubCost))} ETH</p>
-            <p className={cn(s.modalText)}>11/18/2022 12PM EST</p>
+            <img src={logo.src} className={cn(s.modalLogo)} />
+            <p className={cn(s.modalText)}>
+              PUBLIC SALE: {ethers.utils.formatEther(String(pubCost))} ETH
+            </p>
+            {balance >= 0.08 ? (
+              <p className={cn(s.modalText)}>11/18/2022 12PM EST</p>
+            ) : (
+              <p className={cn(s.modalText)}>Insufficent Balance</p>
+            )}
             <div className={cn(s.amountContainer)}>
-              <div className={cn(s.amountButton)} onClick={decrement}>-</div>
+              <div className={cn(s.amountButton)} onClick={decrement}>
+                -
+              </div>
               <p className={cn(s.amount)}>{amount}</p>
-              <div className={cn(s.amountButton)} onClick={increment}>+</div>
+              <div className={cn(s.amountButton)} onClick={increment}>
+                +
+              </div>
             </div>
 
-            <div 
+            <button
+              disabled={balance >= 0.08 ? false : true}
               className={cn(s.mintButton)}
               onClick={mint}
             >
               Mint
+            </button>
+            <div className={cn(s.close)} onClick={() => openModal(false)}>
+              X
             </div>
-            <div className={cn(s.close)} onClick={() => openModal(false)}>X</div>
           </div>
         </div>
-      }
+      )}
     </header>
   );
 };
