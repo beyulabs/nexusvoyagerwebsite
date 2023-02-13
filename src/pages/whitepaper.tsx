@@ -1,10 +1,7 @@
 import React from 'react';
 
-<<<<<<< HEAD
-=======
 declare let window: any;
 
->>>>>>> 75393fb32a5d837e76847d0047df6959d3487baf
 const Whitepaper = () => (
   <div className="container">
     <div
