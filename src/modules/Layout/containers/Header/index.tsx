@@ -82,8 +82,8 @@ const Header = () => {
     let web3: Web3 = new Web3(window.ethereum);
     if (accounts.length > 0) {
       const balance = await web3.eth.getBalance(accounts[0]);
-      // setBalance(+balance);
-      setBalance(0.16);
+      setBalance(+balance);
+
 
       const contr = getContract();
       dispatch(
