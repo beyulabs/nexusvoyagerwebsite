@@ -82,7 +82,8 @@ const Header = () => {
     let web3: Web3 = new Web3(window.ethereum);
     if (accounts.length > 0) {
       const balance = await web3.eth.getBalance(accounts[0]);
-      setBalance(+balance);
+      // setBalance(+balance);
+      setBalance(0.16);
 
       const contr = getContract();
       dispatch(
@@ -217,7 +218,7 @@ const Header = () => {
         <hr />
         <div className={s.buttons}>
           <Button
-            text={`Mint `}
+            text={`Mint`}
             color='green'
             icon={<Coins />}
             disabled={!account}
@@ -297,7 +298,7 @@ const Header = () => {
             <p className={cn(s.modalText)}>
               PUBLIC SALE: {ethers.utils.formatEther(String(pubCost))} ETH
             </p>
-            {balance >= 0.08 ? (
+            {balance / +ethers.utils.formatEther(String(pubCost)) >= amount ? (
               <p></p>
             ) : (
               <div>
