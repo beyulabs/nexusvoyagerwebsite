@@ -301,7 +301,7 @@ const Header = () => {
               <p></p>
             ) : (
               <div>
-                <p className={cn(s.modalText)}>11/18/2022 12PM EST</p>
+                {/* <p className={cn(s.modalText)}>11/18/2022 12PM EST</p> */}
                 <p className={cn(s.modalText)}>Insufficent Balance</p>
               </div>
             )}
