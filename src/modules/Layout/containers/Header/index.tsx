@@ -18,7 +18,7 @@ import {
   updateAccount,
 } from "../../../../utils/redux/blockchain/blockchainActions";
 import { NavRoute } from "../../../../types/common";
-import { Buffer } from "buffer";
+
 import {
   selectAccountState,
   setConnectedAccount,
@@ -57,7 +57,7 @@ const Header = () => {
   const [modal, openModal] = useState(false);
   const [tree, createTree] = useState(new MerkleTree([], null));
 
-  const [balance, setBalance] = useState(100);
+  const [balance, setBalance] = useState(0);
 
   const getWhitelistedAddresses = () => {
     const leafNodes = whitelist.map((addr) => keccak256(addr));
@@ -68,19 +68,22 @@ const Header = () => {
 
   const getAccounts = async () => {
     const { ethereum } = window;
-
     const accountsConnected = await ethereum.request({
       method: "eth_accounts",
     });
+
     return accountsConnected;
   };
 
   const setConnectedAccountMeth = async () => {
+    // await provider.send("eth_requestAccounts", []);
     const accounts = await getAccounts();
+
     let web3: Web3 = new Web3(window.ethereum);
     if (accounts.length > 0) {
       const balance = await web3.eth.getBalance(accounts[0]);
-      setBalance(+balance);
+      // setBalance(+balance);
+      setBalance(0.16);
 
       const contr = getContract();
       dispatch(
@@ -90,20 +93,21 @@ const Header = () => {
   };
 
   const fetchInfo = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(CONTRACT.address, abi, signer);
+    if (account !== null) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT.address, abi, signer);
 
-    const globprice = await contract.CREW_MINT_PRICE();
-    const preprice = await contract.FOUNDING_CREW_MINT_PRICE();
-    const preboarding = await contract.preboarding();
-    const generalBoarding = await contract.generalBoarding();
+      const globprice = await contract.CREW_MINT_PRICE();
+      const preprice = await contract.FOUNDING_CREW_MINT_PRICE();
+      const preboarding = await contract.preboarding();
+      const generalBoarding = await contract.generalBoarding();
 
-    setPubCost(Number(globprice.toString()));
-    setPreCost(Number(preprice.toString()));
-    setPubSale(generalBoarding);
-    setPreSale(preboarding);
+      setPubCost(Number(globprice.toString()));
+      setPreCost(Number(preprice.toString()));
+      setPubSale(generalBoarding);
+      setPreSale(preboarding);
+    }
   };
 
   const handleConnection = async () => {
@@ -134,7 +138,8 @@ const Header = () => {
 
   const mint = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
+    // await provider.send("eth_requestAccounts", []);
+
     const signer = provider.getSigner();
     const contract = new ethers.Contract(CONTRACT.address, abi, signer);
     const user = keccak256(account);
@@ -213,7 +218,7 @@ const Header = () => {
         <hr />
         <div className={s.buttons}>
           <Button
-            text={`Mint `}
+            text={`Mint`}
             color='green'
             icon={<Coins />}
             disabled={!account}
@@ -224,9 +229,7 @@ const Header = () => {
             color='transparent'
             icon={<Wallet />}
             disabled={account}
-            onClick={() => {
-              handleConnection;
-            }}
+            onClick={handleConnection}
           />
         </div>
       </div>
@@ -295,10 +298,13 @@ const Header = () => {
             <p className={cn(s.modalText)}>
               PUBLIC SALE: {ethers.utils.formatEther(String(pubCost))} ETH
             </p>
-            {balance >= 0.08 ? (
-              <p className={cn(s.modalText)}>11/18/2022 12PM EST</p>
+            {balance / +ethers.utils.formatEther(String(pubCost)) >= amount ? (
+              <p></p>
             ) : (
-              <p className={cn(s.modalText)}>Insufficent Balance</p>
+              <div>
+                {/* <p className={cn(s.modalText)}>11/18/2022 12PM EST</p> */}
+                <p className={cn(s.modalText)}>Insufficent Balance</p>
+              </div>
             )}
             <div className={cn(s.amountContainer)}>
               <div className={cn(s.amountButton)} onClick={decrement}>
@@ -314,6 +320,7 @@ const Header = () => {
               disabled={balance >= 0.08 ? false : true}
               className={cn(s.mintButton)}
               onClick={mint}
+              style={balance <= 0.08 ? { cursor: "not-allowed" } : {}}
             >
               Mint
             </button>
