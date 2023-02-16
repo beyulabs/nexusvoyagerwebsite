@@ -57,4 +57,5 @@ export const selectLoadingState = (state: AppState) => state.blockchain.loading;
 export const selectErrorState = (state: AppState) => state.blockchain.errorMsg;
 export const selectModalState = (state: AppState) => state.blockchain.modal;
 
+
 export default blockchainSlice.reducer;
