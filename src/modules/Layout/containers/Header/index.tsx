@@ -35,6 +35,7 @@ import s from "./Header.module.scss";
 import logo from "../../../../../public/nexus-voyagers-logotype.png";
 import Web3 from "web3";
 declare let window: any;
+declare let contr: any;
 
 const Header = () => {
   // @ts-ignore
@@ -68,6 +69,7 @@ const Header = () => {
 
   const getAccounts = async () => {
     const { ethereum } = window;
+
     const accountsConnected = await ethereum.request({
       method: "eth_accounts",
     });
@@ -78,12 +80,10 @@ const Header = () => {
   const setConnectedAccountMeth = async () => {
     // await provider.send("eth_requestAccounts", []);
     const accounts = await getAccounts();
-
     let web3: Web3 = new Web3(window.ethereum);
     if (accounts.length > 0) {
       const balance = await web3.eth.getBalance(accounts[0]);
       setBalance(+balance);
-
 
       const contr = getContract();
       dispatch(
@@ -154,6 +154,12 @@ const Header = () => {
   };
 
   useEffect(() => {
+    const { ethereum } = window;
+    ethereum.on("accountsChanged", (accounts: any) => {
+      dispatch(
+        setConnectedAccount({ account: account, smartContract: getContract() })
+      );
+    });
     setConnectedAccountMeth();
     fetchInfo();
     getWhitelistedAddresses();
@@ -225,12 +231,19 @@ const Header = () => {
             onClick={() => openModal(true)}
           />
           <Button
-            text={!account ? "Connect wallet" : "Connected"}
+            text={!account ? "Connect wallet" : `Connected`}
             color='transparent'
             icon={<Wallet />}
             disabled={account}
             onClick={handleConnection}
           />
+          {/* <Button
+            text={!account ? "Connect wallet" : `Changed ${account}`}
+            color='transparent'
+            icon={<Wallet />}
+            // disabled={account}
+            onClick={changeConnection}
+          /> */}
         </div>
       </div>
     </div>

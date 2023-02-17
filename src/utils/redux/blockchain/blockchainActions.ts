@@ -56,7 +56,13 @@ export const checkNetwork = async () => {
 };
 
 export const updateAccount = (account: any, contr: any) => {
-    return async (dispatch: any) => {
-        dispatch(setConnectedAccount({ account: account, smartContract: contr }));
-    };
+    async (dispatch: any) => dispatch(setConnectedAccount({ account: account, smartContract: contr }));
+    ;
+
 };
+
+
+
+
+
+
